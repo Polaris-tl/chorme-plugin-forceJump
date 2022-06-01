@@ -1,8 +1,9 @@
 function changeLinkHref () {
   // https://link.jianshu.com?t=xxxxxx 简书
   // https://link.juejin.cn/?target=xxxxx 掘金
+  // https://link.zhihu.com/?target=xxxxx 知乎
   const links = document.querySelectorAll('a')
-  const reg = /(?:cn\/\?target|com?\/\?t)=(.*)/
+  const reg = /(?:cn\/\?target|com?\/\?t|com\/\?target)=(.*)/
   let count = 0;
   links.forEach(link => {
     const match = reg.exec(link.href)

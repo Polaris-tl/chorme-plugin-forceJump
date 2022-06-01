@@ -26,7 +26,7 @@
   },
   "content_scripts": [
       {
-        "matches": ["https://*.csdn.net/*", "https://*.juejin.cn/*", "https://*.jianshu.com/*"],
+        "matches": ["https://*.csdn.net/*", "https://*.juejin.cn/*", "https://*.jianshu.com/*", "https://*.zhihu.com/*"],
         "js": ["scripts/background.js"]
       }
   ],
