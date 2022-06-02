@@ -12,3 +12,7 @@ chorme浏览器
 - 开启右上角的`开发者模式`
 - 点击左上角的`加载已解压的扩展程序`，选择刚才的文件夹
 - 安装成功
+
+#### 注意
+浏览器版本高于88在安装时可能会出现错误警告(不影响正常使用)
+这是由于manifest_version的版本为2的缘故。在未来版本3中，background脚本会作为service worker被加载，也就是说不能在后台脚本操作dom了，详见https://developer.chrome.com/docs/extensions/mv3/mv3-migration-checklist/
