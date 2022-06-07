@@ -1,6 +1,6 @@
 
 {
-  "manifest_version": 2,
+  "manifest_version": 3,
   "name": "forceJump",
   "version": "1.0.0",
   "description": "make you free for link-jump",
@@ -10,7 +10,7 @@
       "48": "images/38x38.png",
       "128": "images/38x38.png"
   },
-  "page_action":{
+  "action":{
       "default_icon":
       {
           "24": "images/24x24.png",
@@ -18,12 +18,6 @@
       }
   },
   "author": "Polaris https://www.ttangg.com",
-  "background":
-  {
-      "scripts": [
-          "scripts/background.js"
-      ]
-  },
   "content_scripts": [
       {
         "matches": ["https://*.csdn.net/*", "https://*.juejin.cn/*", "https://*.jianshu.com/*", "https://*.zhihu.com/*"],
