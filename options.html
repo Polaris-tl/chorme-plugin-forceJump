@@ -1,0 +1,152 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>forceJump 设置</title>
+    <style>
+      :root {
+        color-scheme: light;
+      }
+
+      body {
+        margin: 0;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        background: #f5f7fa;
+        color: #1f2937;
+      }
+
+      .page {
+        max-width: 640px;
+        margin: 0 auto;
+        padding: 28px 20px 32px;
+      }
+
+      .card {
+        background: #fff;
+        border: 1px solid #dbe3ef;
+        border-radius: 12px;
+        padding: 20px;
+        box-shadow: 0 8px 20px rgba(15, 23, 42, 0.04);
+      }
+
+      h1 {
+        margin: 0 0 8px;
+        font-size: 22px;
+      }
+
+      p {
+        margin: 0 0 16px;
+        color: #4b5563;
+      }
+
+      .section {
+        padding: 14px 0;
+        border-top: 1px dashed #e5e7eb;
+      }
+
+      .section:first-of-type {
+        border-top: none;
+        padding-top: 6px;
+      }
+
+      .section-title {
+        margin: 0 0 10px;
+        font-size: 14px;
+        font-weight: 700;
+        color: #111827;
+      }
+
+      label {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin: 8px 0;
+        font-size: 14px;
+      }
+
+      .actions {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        margin-top: 16px;
+      }
+
+      button {
+        border: none;
+        border-radius: 8px;
+        padding: 10px 14px;
+        font-size: 14px;
+        cursor: pointer;
+        background: #e5e7eb;
+        color: #111827;
+      }
+
+      button:hover {
+        background: #d1d5db;
+      }
+
+      #status {
+        font-size: 13px;
+        color: #0f766e;
+        min-height: 18px;
+      }
+
+      .hint {
+        margin-top: 12px;
+        font-size: 12px;
+        color: #6b7280;
+      }
+    </style>
+  </head>
+  <body>
+    <main class="page">
+      <section class="card">
+        <h1>forceJump 设置</h1>
+        <p>开启或关闭插件功能，修改后会自动保存。</p>
+
+        <div class="section">
+          <h2 class="section-title">全局</h2>
+          <label>
+            <input id="enabled" type="checkbox" />
+            启用 forceJump
+          </label>
+          <label>
+            <input id="debug" type="checkbox" />
+            输出调试日志（控制台）
+          </label>
+        </div>
+
+        <div class="section">
+          <h2 class="section-title">站点开关</h2>
+          <label>
+            <input id="site-csdn" type="checkbox" />
+            CSDN (`*.csdn.net`)
+          </label>
+          <label>
+            <input id="site-juejin" type="checkbox" />
+            掘金 (`*.juejin.cn`)
+          </label>
+          <label>
+            <input id="site-jianshu" type="checkbox" />
+            简书 (`*.jianshu.com`)
+          </label>
+          <label>
+            <input id="site-zhihu" type="checkbox" />
+            知乎 (`*.zhihu.com`)
+          </label>
+        </div>
+
+        <div class="actions">
+          <button id="reset" type="button">恢复默认设置</button>
+          <div id="status" role="status" aria-live="polite"></div>
+        </div>
+        <div class="hint">已打开的页面建议刷新后再验证效果。</div>
+      </section>
+    </main>
+
+    <script src="scripts/settings.js"></script>
+    <script src="scripts/options.js"></script>
+  </body>
+</html>

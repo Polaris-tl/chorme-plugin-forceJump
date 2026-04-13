@@ -1,4 +1,8 @@
 (() => {
+  if (typeof forceJumpSettings === "undefined") {
+    return;
+  }
+
   const REDIRECT_PARAM_BY_HOST = {
     "link.jianshu.com": "t",
     "links.jianshu.com": "to",
@@ -9,6 +13,17 @@
 
   const FALLBACK_PARAMS = ["target", "to", "t"];
   let totalUpdated = 0;
+  let currentSettings = forceJumpSettings.DEFAULT_SETTINGS;
+  let observer = null;
+  let removeSettingsListener = () => {};
+  let listenersBound = false;
+
+  function logDebug(message) {
+    if (!currentSettings.debug) {
+      return;
+    }
+    console.debug(`[forceJump] ${message}`);
+  }
 
   function decodeMaybeEncoded(value) {
     let decoded = value;
@@ -72,6 +87,9 @@
       return false;
     }
 
+    if (!anchor.dataset.forcejumpOriginalHref) {
+      anchor.dataset.forcejumpOriginalHref = anchor.getAttribute("href") || anchor.href;
+    }
     anchor.href = directUrl;
     anchor.dataset.forcejumpRewritten = "1";
     return true;
@@ -102,38 +120,62 @@
     }
 
     totalUpdated += count;
-    console.debug(`[forceJump] Updated ${count} redirect link(s), total: ${totalUpdated}`);
+    logDebug(`Updated ${count} redirect link(s), total: ${totalUpdated}`);
   }
 
-  report(rewriteInNode(document.documentElement));
-
-  const observer = new MutationObserver((mutations) => {
-    let changed = 0;
-
-    mutations.forEach((mutation) => {
-      if (mutation.type === "childList") {
-        mutation.addedNodes.forEach((node) => {
-          changed += rewriteInNode(node);
-        });
-        return;
+  function restoreRewrittenAnchors() {
+    const rewrittenAnchors = document.querySelectorAll("a[data-forcejump-rewritten='1']");
+    rewrittenAnchors.forEach((anchor) => {
+      const originalHref = anchor.dataset.forcejumpOriginalHref;
+      if (originalHref) {
+        anchor.setAttribute("href", originalHref);
       }
+      delete anchor.dataset.forcejumpRewritten;
+      delete anchor.dataset.forcejumpOriginalHref;
+    });
+  }
 
-      if (mutation.type === "attributes" && mutation.target instanceof HTMLAnchorElement) {
-        if (rewriteAnchor(mutation.target)) {
-          changed += 1;
+  function startObserver() {
+    if (observer) {
+      return;
+    }
+
+    observer = new MutationObserver((mutations) => {
+      let changed = 0;
+
+      mutations.forEach((mutation) => {
+        if (mutation.type === "childList") {
+          mutation.addedNodes.forEach((node) => {
+            changed += rewriteInNode(node);
+          });
+          return;
         }
-      }
+
+        if (mutation.type === "attributes" && mutation.target instanceof HTMLAnchorElement) {
+          if (rewriteAnchor(mutation.target)) {
+            changed += 1;
+          }
+        }
+      });
+
+      report(changed);
     });
 
-    report(changed);
-  });
+    observer.observe(document.documentElement, {
+      childList: true,
+      subtree: true,
+      attributes: true,
+      attributeFilter: ["href"],
+    });
+  }
 
-  observer.observe(document.documentElement, {
-    childList: true,
-    subtree: true,
-    attributes: true,
-    attributeFilter: ["href"],
-  });
+  function stopObserver() {
+    if (!observer) {
+      return;
+    }
+    observer.disconnect();
+    observer = null;
+  }
 
   function neutralizeRedirectHandlers(event) {
     const target = event.target;
@@ -150,6 +192,49 @@
     event.stopImmediatePropagation();
   }
 
-  document.addEventListener("click", neutralizeRedirectHandlers, true);
-  document.addEventListener("auxclick", neutralizeRedirectHandlers, true);
+  function enableForPage() {
+    report(rewriteInNode(document.documentElement));
+    startObserver();
+    if (!listenersBound) {
+      document.addEventListener("click", neutralizeRedirectHandlers, true);
+      document.addEventListener("auxclick", neutralizeRedirectHandlers, true);
+      listenersBound = true;
+    }
+  }
+
+  function disableForPage() {
+    stopObserver();
+    if (listenersBound) {
+      document.removeEventListener("click", neutralizeRedirectHandlers, true);
+      document.removeEventListener("auxclick", neutralizeRedirectHandlers, true);
+      listenersBound = false;
+    }
+    restoreRewrittenAnchors();
+  }
+
+  function applySettings(settings) {
+    currentSettings = forceJumpSettings.withDefaults(settings);
+    const siteKey = forceJumpSettings.getSiteKeyByHost(location.hostname);
+    const shouldEnable =
+      currentSettings.enabled && forceJumpSettings.isSiteEnabled(currentSettings, siteKey);
+
+    if (shouldEnable) {
+      enableForPage();
+      logDebug(`Enabled on site: ${siteKey || location.hostname}`);
+      return;
+    }
+
+    disableForPage();
+    logDebug(`Disabled on site: ${siteKey || location.hostname}`);
+  }
+
+  forceJumpSettings.loadSettings().then((settings) => {
+    applySettings(settings);
+    removeSettingsListener = forceJumpSettings.onSettingsChanged(applySettings);
+  });
+
+  window.addEventListener("unload", () => {
+    removeSettingsListener();
+    stopObserver();
+  });
 })();
